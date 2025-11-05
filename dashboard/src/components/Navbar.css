@@ -1,0 +1,82 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 300px;
+  background: #0a0a23;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  z-index: 999;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.sidebar li {
+  width: 100%;
+  padding: 15px 0;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar li:hover {
+  background: #007bff;
+}
+
+.logout-btn {
+  color: #ff8f8f;
+}
+
+/* ------------- MOBILE VIEW ------------- */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  background: #0a0a23;
+  color: white;
+  font-size: 28px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+@media (max-width: 900px) {
+  .hamburger {
+    display: block;
+  }
+
+  .sidebar {
+    transform: translateX(-100%); /* hide sidebar */
+  }
+
+  .sidebar.open {
+    transform: translateX(0); /* slide when hamburger clicked */
+  }
+}
+
+/* Ensure dashboard content adjusts on mobile */
+@media (max-width: 900px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}

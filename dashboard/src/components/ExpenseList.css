@@ -1,0 +1,192 @@
+/* 🌸 Container styling */
+.expense-list {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* ✨ Section title */
+.section-title {
+  text-align: center;
+  color: #e60000;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+/* 💡 Success message */
+.success-msg {
+  background-color: #e6ffed;
+  color: #006b1b;
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid #b3ffcc;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 15px;
+  opacity: 0;
+  animation: fadeInOut 2.2s ease-in-out;
+}
+
+/* 🎯 Table styling */
+.expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Poppins", sans-serif;
+  margin-top: 10px;
+  min-width: 650px; /* Ensures table scrolls on mobile */
+}
+
+.expenses-table th,
+.expenses-table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.expenses-table th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+}
+
+.expenses-table td {
+  color: #555;
+}
+
+/* 🌈 Hover highlight */
+.expenses-table tr:hover {
+  background-color: #222;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+/* ✏️ Editing row */
+.editing-row {
+  background-color: #fff9e6 !important;
+}
+
+.editing-row input {
+  width: 90%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* 🧿 Buttons */
+.update-btn,
+.save-btn,
+.cancel-btn,
+.delete-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.25s ease-in-out;
+}
+
+.update-btn { background-color: #007bff; color: white; }
+.update-btn:hover { background-color: #0062cc; }
+
+.save-btn { background-color: #28a745; color: white; }
+.save-btn:hover { background-color: #218838; }
+
+.cancel-btn { background-color: #ffc107; color: black; }
+.cancel-btn:hover { background-color: #e0a800; }
+
+.delete-btn { background-color: #dc3545; color: white; }
+.delete-btn:hover { background-color: #c82333; }
+
+/* 🗑 Delete Confirmation Popup */
+.popup-content.confirm {
+  background-color: #fff;
+  color: #333;
+  border: 2px solid #ff4444;
+  padding: 25px 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 350px;
+  max-width: 90vw;
+}
+
+/* Filter section */
+.filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.filter-container input {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.filter-btn,
+.clear-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.filter-btn { background-color: #007bff; color: white; }
+.clear-btn { background-color: #dc3545; color: white; }
+
+/* 💰 Total Amount Display */
+.table-total {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: right;
+  font-family: "Poppins", sans-serif;
+}
+
+.table-total span {
+  color: #e60000;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+/* 🌟 Responsive Adjustments */
+@media (max-width: 900px) {
+  .expense-list {
+    padding: 18px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .filter-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-container input,
+  .filter-btn,
+  .clear-btn {
+    width: 100%;
+  }
+
+  .table-total {
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .table-total span {
+    font-size: 1.2rem;
+  }
+}

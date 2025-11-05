@@ -1,0 +1,113 @@
+/* MAIN LAYOUT — MOBILE FIRST */
+.login-page {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #e8f0ff;
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Left Section (Welcome Text + Title) */
+.login-left {
+  margin-bottom: 30px;
+}
+
+.app-title {
+  font-size: 38px;
+  font-weight: 700;
+  color: #234c6f;
+  margin-bottom: 25px;
+}
+
+.welcome-title,
+.signup-title {
+  font-size: 40px;
+  font-weight: 800;
+  color: #1b2b48;
+  margin-bottom: 12px;
+}
+
+.welcome-sub {
+  font-size: 18px;
+  color: #4c5d75;
+}
+
+/* LOGIN / SIGNUP BOX */
+.login-box {
+  width: 100%;
+  max-width: 300px;
+  background: #fff;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+/* INPUTS */
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 6px;
+  border: 1px solid #dce3f0;
+  font-size: 16px;
+}
+
+/* BUTTON */
+.login-box button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #006eff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.login-box button:hover {
+  background: #0052cc;
+}
+
+/* LINK */
+.login-box .link {
+  color: #006eff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ✅ TABLET — stack normally but keep centered */
+@media (min-width: 768px) {
+  .login-page {
+    flex-direction: row;
+    justify-content: center;
+    text-align: left;
+  }
+
+  .login-left {
+    margin-right: 50px;
+    text-align: left;
+  }
+}
+
+/* ✅ SMALL PHONES */
+@media (max-width: 480px) {
+  .welcome-title,
+  .signup-title {
+    font-size: 32px;
+  }
+
+  .app-title {
+    font-size: 28px;
+  }
+
+  .welcome-sub {
+    font-size: 15px;
+  }
+}
