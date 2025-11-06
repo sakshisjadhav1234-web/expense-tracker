@@ -1,4 +1,4 @@
-const BASE_URL = ""; // 
+const BASE_URL = "https://expense-tracker-5t4e.onrender.com"; 
 
 //  Get Expenses of Logged-In User
 export async function fetchExpenses() {
