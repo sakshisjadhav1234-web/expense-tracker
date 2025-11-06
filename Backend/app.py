@@ -7,8 +7,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://expense-tracker-dashboard.onrender.com"}})
-
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Use Render PostgreSQL automatically
 db_url = os.getenv("DATABASE_URL")
