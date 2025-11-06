@@ -1,171 +1,164 @@
-import sqlite3
-from flask import Flask, jsonify,request
-import os,sqlalchemy
-from datetime import datetime
-from expense_db import DB_PATH,init_db
+from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
+app = Flask(__name__)
 
-init_db()
-#create instance of flask web application
-app=Flask(__name__)
+# Use Render PostgreSQL automatically
+db_url = os.getenv("DATABASE_URL")
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+# ----------------------- MODELS ----------------------- #
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    expense_category = db.Column(db.String(120), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    date = db.Column(db.String(20), nullable=False)
+    note = db.Column(db.String(200))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+# ------------------------------------------------------ #
 
 @app.route('/')
 def homepage():
-    return "Expense Tracker API is running!"
+    return "Expense Tracker API is running with PostgreSQL!"
 
-@app.route('/expenses/<int:user_id>',methods=['GET'])
+# ---------------- EXPENSE LIST ---------------- #
+
+@app.route('/expenses/<int:user_id>', methods=['GET'])
 def get_expenses(user_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, expense_category, amount, date, note FROM expense WHERE user_id = ? ORDER BY date DESC", (user_id,))
-    rows = cursor.fetchall()
-    conn.close()
-    # Convert rows to dicts for JSON output
-    expenses = [{"id": r[0], "expense_category": r[1], "amount": r[2], "date": r[3], "note": r[4]} for r in rows]
-    return jsonify(expenses)
+    expenses = Expense.query.filter_by(user_id=user_id).order_by(Expense.date.desc()).all()
+    return jsonify([
+        {
+            "id": exp.id,
+            "expense_category": exp.expense_category,
+            "amount": exp.amount,
+            "date": exp.date,
+            "note": exp.note
+        }
+        for exp in expenses
+    ])
+
+# ---------------- ADD EXPENSE ---------------- #
 
 @app.route('/add', methods=['POST'])
 def add_expense():
     data = request.get_json()
-    category = data.get('expense_category')
-    amount = data.get('amount')
-    date = data.get('date', datetime.now().strftime('%Y-%m-%d'))
-    note = data.get('note', '')
-    user_id = data.get('user_id') 
 
-    # Validate required fields
-    if not category or amount is None or not user_id:
-        return jsonify({"error": "Missing required fields"}), 400
-
-    # Insert into database
-    db = sqlite3.connect(DB_PATH)
-    cursor = db.cursor()
-    cursor.execute(
-        "INSERT INTO expense (expense_category, amount, date, note,user_id) VALUES (?, ?, ?, ?, ?)",
-        (category, amount, date, note,user_id)
+    new_expense = Expense(
+        expense_category=data["expense_category"],
+        amount=float(data["amount"]),
+        date=data.get("date", datetime.now().strftime('%Y-%m-%d')),
+        note=data.get("note", ""),
+        user_id=data["user_id"]
     )
-    db.commit()
-    db.close()
-    print("Received Data:", data) 
+
+    db.session.add(new_expense)
+    db.session.commit()
+
     return jsonify({"message": "Expense added successfully!"}), 201
 
-@app.route('/update/<int:user_id>/<int:id>',methods=['PUT'])
-def update_expense(user_id,id):
-    data = request.get_json()
-    db= sqlite3.connect(DB_PATH)
-    cursor=db.cursor()
-    cursor.execute("SELECT * FROM expense WHERE id = ? AND user_id=?", (id, user_id))
-    existing = cursor.fetchone()
+# ---------------- UPDATE EXPENSE ---------------- #
 
-    if not existing:
-        return jsonify({"error":"Expense not found"}),400
-    
-    # Use new values if provided, otherwise keep old ones
-    category = data.get('expense_category', existing[1])
-    amount = data.get('amount', existing[2])
-    date = data.get('date', existing[3])
-    note = data.get('note', existing[4])
-
-    cursor.execute("UPDATE expense SET expense_category=?, amount=?, date=?, note=? WHERE id=? AND user_id=?",
-                   (category, amount, date, note, id, user_id))
-    
-    db.commit()
-    db.close()
-    return jsonify({
-    "id": id,
-    "expense_category": category,
-    "amount": amount,
-    "date": date,
-    "note": note
-}), 200
-
-
-
-@app.route('/delete/<int:user_id>/<int:id>',methods=['DELETE'])
-def delete_expenses(user_id,id):
-
-    db= sqlite3.connect(DB_PATH)
-    cursor=db.cursor()
-    cursor.execute("SELECT * FROM expense WHERE id=? AND user_id=?", (id, user_id))
-    existing = cursor.fetchone()
-
-    if not existing:
-        db.close()
+@app.route('/update/<int:user_id>/<int:id>', methods=['PUT'])
+def update_expense(user_id, id):
+    exp = Expense.query.filter_by(id=id, user_id=user_id).first()
+    if not exp:
         return jsonify({"error": "Expense not found"}), 404
 
-    cursor.execute("DELETE FROM expense WHERE id=? AND user_id=?", (id, user_id))
-    db.commit()
-    db.close()
-    return jsonify({"message": f"Expense ID {id} deleted successfully!"}), 200
-    
+    data = request.get_json()
+
+    exp.expense_category = data.get("expense_category", exp.expense_category)
+    exp.amount = data.get("amount", exp.amount)
+    exp.date = data.get("date", exp.date)
+    exp.note = data.get("note", exp.note)
+
+    db.session.commit()
+    return jsonify({"message": "Expense updated successfully!"})
+
+# ---------------- DELETE EXPENSE ---------------- #
+
+@app.route('/delete/<int:user_id>/<int:id>', methods=['DELETE'])
+def delete_expense(user_id, id):
+    exp = Expense.query.filter_by(id=id, user_id=user_id).first()
+    if not exp:
+        return jsonify({"error": "Expense not found"}), 404
+
+    db.session.delete(exp)
+    db.session.commit()
+
+    return jsonify({"message": f"Expense ID {id} deleted successfully!"})
+
+# ---------------- TOTALS ---------------- #
+
 @app.route('/totals/<int:user_id>', methods=['GET'])
 def get_totals(user_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    # current month
+    current_month = datetime.now().strftime("%Y-%m")
+    last_month = (datetime.now().replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
 
-    # Current month
-    cursor.execute("""
-        SELECT SUM(amount)
-        FROM expense
-        WHERE user_id = ? AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')
-    """, (user_id,))
-    current_total = cursor.fetchone()[0] or 0
+    current_total = db.session.query(db.func.sum(Expense.amount)).filter(
+        Expense.user_id == user_id,
+        Expense.date.like(f"{current_month}%")
+    ).scalar() or 0
 
-    # Last month
-    cursor.execute("""
-        SELECT SUM(amount)
-        FROM expense
-        WHERE user_id = ? AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now', '-1 month')
-    """, (user_id,))
-    last_total = cursor.fetchone()[0] or 0
+    last_total = db.session.query(db.func.sum(Expense.amount)).filter(
+        Expense.user_id == user_id,
+        Expense.date.like(f"{last_month}%")
+    ).scalar() or 0
 
-    conn.close()
     return jsonify({
         "current_month_total": current_total,
         "last_month_total": last_total
     })
 
-
+# ---------------- AUTH ---------------- #
 
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    db = sqlite3.connect(DB_PATH)
-    cursor = db.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE email = ?", (data['email'],))
-    if cursor.fetchone():
+    if User.query.filter_by(email=data["email"]).first():
         return jsonify({"error": "Email already exists"}), 400
 
-    hashed = generate_password_hash(data['password'])
-
-    cursor.execute("INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-                   (data['name'], data['email'], hashed))
-    db.commit()
-    db.close()
+    user = User(
+        name=data["name"],
+        email=data["email"],
+        password_hash=generate_password_hash(data["password"])
+    )
+    db.session.add(user)
+    db.session.commit()
 
     return jsonify({"message": "Signup Successful"}), 201
-
 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    db = sqlite3.connect(DB_PATH)
-    cursor = db.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE email = ?", (data['email'],))
-    user = cursor.fetchone()
-
-    if not user or not check_password_hash(user[3], data['password']):
+    user = User.query.filter_by(email=data["email"]).first()
+    if not user or not check_password_hash(user.password_hash, data["password"]):
         return jsonify({"error": "Invalid Credentials"}), 401
 
     return jsonify({
-    "message": "Login Success",
-    "user_id": user[0],
-    "name": user[1]   
-}), 200
-
+        "message": "Login Success",
+        "user_id": user.id,
+        "name": user.name
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
