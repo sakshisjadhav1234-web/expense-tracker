@@ -45,7 +45,7 @@ export default function AddExpenseForm({ OnExpense }) {
     <div className="add-expense">
       <h2>Add Your New Expense</h2>
 
-      {/* ✅ Popup for success message */}
+      {/* Popup for success message */}
       {message && (
         <div className="add-popup">
           <div className="add-popup-content">

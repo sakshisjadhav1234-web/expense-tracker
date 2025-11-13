@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { loginUser } from "../Api";
 import "./Auth.css";
 
-
 export default function Login({ setActivePage }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePassword = () => setShowPassword(!showPassword);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,51 +22,64 @@ export default function Login({ setActivePage }) {
       setError("Invalid email or password");
     }
   };
-return (
- <div className="login-page">
-  
-  {/* LEFT SIDE */}
-  <div className="login-left">
-    <h1 className="app-title">💰 Expense Tracker</h1>
 
-    <h2 className="welcome-title">Welcome Back 👋</h2>
-    <p className="welcome-sub">Track your spending smartly!</p>
-  </div>
+  const handleForgotPassword = () => {
+    if (!email) {
+      alert("⚠️ Please enter your email first");
+      return;
+    }
+    localStorage.setItem("fp_email", email); // store email for forgot flow
+    setActivePage("verify"); // go to verify identity
+  };
 
-  {/* RIGHT SIDE (Login Box) */}
-  <div className="login-box">
-    <h2>Login</h2>
+  return (
+    <div className="login-page">
+      {/* LEFT SIDE */}
+      <div className="login-left">
+        <h1 className="app-title">💰 Expense Tracker</h1>
+        <h2 className="welcome-title">Welcome Back 👋</h2>
+        <p className="welcome-sub">Track your spending smartly!</p>
+      </div>
 
-    {error && <p className="error">{error}</p>}
+      {/* RIGHT SIDE (Login Box) */}
+      <div className="login-box">
+        <h2>Login</h2>
 
-    <input 
-      placeholder="Email" 
-      value={email} 
-      onChange={(e) => setEmail(e.target.value)} 
-    />
+        {error && <p className="error">{error}</p>}
 
-    <input 
-      type="password" 
-      placeholder="Password" 
-      value={password} 
-      onChange={(e) => setPassword(e.target.value)} 
-    />
+        <input
+          placeholder="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-    <button onClick={handleLogin}>Login</button>
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <small className="toggle-eye" onClick={togglePassword}>
+            {showPassword ? "Hide" : "Show"}
+          </small>
+        </div>
 
-    <p>
-      Not registered? 
-      <span className="link" onClick={() => setActivePage("signup")}>
-        Create Account
-      </span>
-    </p>
-  </div>
+        <button onClick={handleLogin}>Login</button>
 
-</div>
+        {/*  Forgot Password link */}
+        <p className="link forgot-link" onClick={handleForgotPassword}>
+          Forgot Password?
+        </p>
 
-  
-);
-
-
-
+        <p>
+          Not registered?{" "}
+          <span className="link" onClick={() => setActivePage("signup")}>
+            Create Account
+          </span>
+        </p>
+      </div>
+    </div>
+  );
 }

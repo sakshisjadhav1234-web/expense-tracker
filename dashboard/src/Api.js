@@ -77,14 +77,59 @@ export async function loginUser(email, password) {
 }
 
 //  Signup
-export async function signupUser(name, email, password) {
+export async function signupUser(name, email, password,security_question,security_answer) {
   const response = await fetch(`${BASE_URL}/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password,security_question, security_answer }),
   });
 
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Signup failed");
   return data;
+}
+
+export async function verifySecurityAnswer(email, security_answer) {
+  const response = await fetch(`${BASE_URL}/verify-security`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, security_answer }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Security answer mismatch");
+  }
+
+  return response.json();
+}
+export async function resetPassword(email, new_password) {
+  const response = await fetch(`${BASE_URL}/reset-password`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, new_password }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Password reset failed");
+  }
+
+  return data;
+}
+
+//  Get Security Question for Forgot Password
+export async function getSecurityQuestion(email) {
+  const response = await fetch(`${BASE_URL}/forgot/get-question`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch security question");
+  }
+  console.log("Sending email for forgot:", email);
+  return data; // { security_question: "What is your pet's name?" }
 }

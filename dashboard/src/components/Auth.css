@@ -111,3 +111,80 @@
     font-size: 15px;
   }
 }
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1; /* Keeps same width */
+}
+
+.toggle-eye {
+  margin-left: -50px; /* Pulls show/hide text inside field */
+  cursor: pointer;
+  color: #007bff;
+  font-size: 13px;
+  user-select: none;
+}
+
+/* Popup (Success Message) */
+.add-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.add-popup-content {
+  background-color: #28a745;
+  color: white;
+  padding: 18px 36px;
+  border-radius: 10px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Style Dropdown same as Input */
+.login-box select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 6px;
+  border: 1px solid #dce3f0;
+  background: #fff;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* When dropdown is focused */
+.login-box select:focus {
+  border-color: #006eff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 110, 255, 0.4);
+}
+.forgot-link {
+  margin-top: 8px;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+.disabled-input {
+  background: #f0f4ff;
+  color: #555;
+  cursor: not-allowed;
+  border: 1px solid #ccd4e0;
+}

@@ -5,11 +5,17 @@ import AddExpenseForm from "./components/AddExpenseForm";
 import ExpenseList from "./components/ExpenseList";
 import Login from "./components/login";
 import Signup from "./components/signup";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 import { fetchTotals } from "./Api";
 import "./App.css";
 
 export default function App() {
-  const [activePage, setActivePage] = useState("login"); // Start at login page
+  const userIdFromStorage = localStorage.getItem("user_id");
+
+  const [activePage, setActivePage] = useState(
+    userIdFromStorage ? "home" : "login"
+  );
   const [totals, setTotals] = useState({
     current_month_total: 0,
     last_month_total: 0,
@@ -19,7 +25,7 @@ export default function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const userId = localStorage.getItem("user_id");
-  const isLoggedIn = !!userId;
+  const isLoggedIn = !!userIdFromStorage;
 
   // Load totals for logged-in user
   async function loadTotals() {
@@ -63,8 +69,10 @@ export default function App() {
         {/* Show pages depending on login */}
         {!isLoggedIn ? (
           <>
-           {activePage === "login" && <Login setActivePage={setActivePage} />}
+          {activePage === "login" && <Login setActivePage={setActivePage} />}
           {activePage === "signup" && <Signup setActivePage={setActivePage} />}
+          {activePage === "verify" && <ForgotPassword setActivePage={setActivePage} />}
+          {activePage === "reset" && <ResetPassword setActivePage={setActivePage} />}
 
           </>
         ) : (
