@@ -186,12 +186,21 @@ def reset_password():
 
 @app.route('/forgot/get-question', methods=['POST'])
 def get_security_question():
-    data = request.get_json()
-    user = User.query.filter_by(email=data['email']).first()
-    if not user:
-        return jsonify({"error": "Email not found"}), 404
-    
-    return jsonify({"security_question": user.security_question})
+    try:
+        data = request.get_json()
+        if not data or "email" not in data:
+            return jsonify({"error": "Email is required"}), 400
+
+        user = User.query.filter_by(email=data["email"]).first()
+        if not user:
+            return jsonify({"error": "Email not found"}), 404
+
+        return jsonify({"security_question": user.security_question}), 200
+
+    except Exception as e:
+        print("Error fetching security question:", e)
+        return jsonify({"error": "Internal Server Error"}), 500
+
 
 @app.route('/login', methods=['POST'])
 def login():
