@@ -7,7 +7,10 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, origins=[
+    "http://localhost:3000",           # for local frontend testing
+    "https://expense-tracker-dashboard.onrender.com"  # your deployed frontend
+])
 
 # Use Render PostgreSQL automatically
 db_url = os.getenv("DATABASE_URL")
@@ -26,6 +29,8 @@ class User(db.Model):
     name = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    security_question = db.Column(db.String(200), nullable=False)
+    security_answer = db.Column(db.String(120), nullable=False)
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -142,12 +147,51 @@ def signup():
     user = User(
         name=data["name"],
         email=data["email"],
-        password_hash=generate_password_hash(data["password"])
+        password_hash=generate_password_hash(data["password"]),
+        security_question=data["security_question"],
+        security_answer=data["security_answer"].lower()  
     )
     db.session.add(user)
     db.session.commit()
 
     return jsonify({"message": "Signup Successful"}), 201
+
+# verify security que
+@app.route('/verify-security', methods=['POST'])
+def verify_security():
+    data = request.get_json()
+    user = User.query.filter_by(email=data["email"]).first()
+
+    if not user:
+        return jsonify({"error": "Email not found"}), 404
+
+    if user.security_answer.lower().strip() != data["security_answer"].lower().strip():
+        return jsonify({"error": "Incorrect security answer"}), 400
+
+    return jsonify({"message": "Verified"}), 200
+
+#reset password
+@app.route('/reset-password', methods=['PUT'])
+def reset_password():
+    data = request.get_json()
+    user = User.query.filter_by(email=data["email"]).first()
+
+    if not user:
+        return jsonify({"error": "Email not found"}), 404
+
+    user.password_hash = generate_password_hash(data["new_password"])
+    db.session.commit()
+
+    return jsonify({"message": "Password reset successful"}), 200
+
+@app.route('/forgot/get-question', methods=['POST'])
+def get_security_question():
+    data = request.get_json()
+    user = User.query.filter_by(email=data['email']).first()
+    if not user:
+        return jsonify({"error": "Email not found"}), 404
+    
+    return jsonify({"security_question": user.security_question})
 
 @app.route('/login', methods=['POST'])
 def login():
